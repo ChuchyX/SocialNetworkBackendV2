@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SocialNetworkBackendV2.Application.Interfaces;
+using SocialNetworkBackendV2.Application.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
