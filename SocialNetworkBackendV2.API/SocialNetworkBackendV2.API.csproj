@@ -16,4 +16,8 @@
     <ProjectReference Include="..\SocialNetworkBackendV2.Infraestructure\SocialNetworkBackendV2.Infraestructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>
