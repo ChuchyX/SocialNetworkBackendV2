@@ -21,7 +21,7 @@ namespace SocialNetworkBackendV2.Application.Services
         public async Task<UserServiceResponse> RegisterUserAsync(UserRegisterDto userDto)
         {
             var result = _userRepository.GetByEmail(userDto.Email);
-            if(result != null)
+            if(result.Result)
                 return new UserServiceResponse { Success = false, Message = "There is already a registered user with this email" };
 
             Utilities.CreatePasswordHash(userDto.Password, out byte[] passwordHash, out byte[] passwordSalt);

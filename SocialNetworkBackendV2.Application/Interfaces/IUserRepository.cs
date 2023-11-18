@@ -10,7 +10,7 @@ namespace SocialNetworkBackendV2.Application.Interfaces
     public interface IUserRepository
     {
         Task Add(User user);
-        Task<User> GetByEmail(string email);
+        Task<bool> GetByEmail(string email);
         Task<IList<User>> GetAll();
     }
 }

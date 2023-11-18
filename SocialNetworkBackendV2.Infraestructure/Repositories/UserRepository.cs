@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SocialNetworkBackendV2.Application.Interfaces;
 using SocialNetworkBackendV2.Domain.Entities;
 using SocialNetworkBackendV2.Infraestructure.DbContexts;
@@ -13,10 +14,12 @@ namespace SocialNetworkBackendV2.Infraestructure.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly UserDbContext _userContext;
+        private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(UserDbContext context)
+        public UserRepository(UserDbContext context, ILogger<UserRepository> logger)
         {
             _userContext = context;
+            _logger = logger;
         }
 
         public async Task Add(User user)
@@ -30,10 +33,9 @@ namespace SocialNetworkBackendV2.Infraestructure.Repositories
             return await _userContext.Users.ToListAsync();
         }
 
-        public async Task<User> GetByEmail(string email)
-        {
-            var user = await _userContext.Users.FirstOrDefaultAsync(u => u.Email == email);
-            return user;
+        public async Task<bool> GetByEmail(string email)
+        {     
+            return _userContext.Users.ToList().Any(x => x.Email == email); 
         }
     }
 }
