@@ -21,6 +21,7 @@ namespace SocialNetworkBackendV2.Application.Mappings
                     dest.PasswordHash = passwordHash;
                     dest.PasswordSalt = passwordSalt;
                 });
+            CreateMap<User, UserDto>();
         }
     }
 }

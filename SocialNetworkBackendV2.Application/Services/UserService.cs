@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Configuration;
 
 namespace SocialNetworkBackendV2.Application.Services
 {
@@ -15,22 +16,37 @@ namespace SocialNetworkBackendV2.Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
-   
-        public UserService(IUserRepository userRepository, IMapper mapper)
+        private readonly IConfiguration _configuration;
+
+        public UserService(IUserRepository userRepository, IMapper mapper, IConfiguration configuration)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _configuration = configuration;
         }
+
         public async Task<UserServiceResponse> RegisterUserAsync(UserRegisterDto userDto)
         {
-            var result = _userRepository.ExistsAny(userDto.Email);
-            if(result.Result)
+            var result = _userRepository.ExistsEmail(userDto.Email).Result;
+            if(result)
                 return new UserServiceResponse { Success = false, Message = "There is already a registered user with this email" };
 
             User user = _mapper.Map<User>(userDto);
             await _userRepository.Add(user);
 
             return new UserServiceResponse { Success = true, Message = "The user was successfully registered" };
+        }
+        public async Task<UserServiceResponse> LoginUserAsync(UserLoginDto userLoginDto)
+        {
+            var user = _userRepository.GetAll().Result.FirstOrDefault(u => u.Email == userLoginDto.Email && Utilities.VerifyPasswordHash(userLoginDto.Password, u.PasswordHash, u.PasswordSalt));
+            if (user == null) return new UserServiceResponse { Success = false, Message = "User Not Found. Wrong Username or Password" };
+
+            _userRepository.AssignToken(user, Utilities.CreateToken(user, _configuration));
+
+            if (user.ProfilePicture != "")
+                user.ProfilePicture = Utilities.ImageToBase64(user.ProfilePicture);
+
+            return new UserServiceResponse { Success = true, User = _mapper.Map<UserDto>(user) };
         }
     }
 }

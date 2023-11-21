@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SocialNetworkBackendV2.Application.Interfaces;
 using SocialNetworkBackendV2.Domain.Entities;
@@ -33,9 +34,19 @@ namespace SocialNetworkBackendV2.Infraestructure.Repositories
             return await _userContext.Users.ToListAsync();
         }
 
-        public async Task<bool> ExistsAny(string email)
+        public async Task<bool> ExistsEmail(string email)
         {     
             return _userContext.Users.ToList().Any(x => x.Email == email); 
+        }
+
+        public async void AssignToken(User user, string token)
+        {
+            user.RefreshToken = token;
+            user.TokenCreated = DateTime.Now;
+            user.TokenExpires = DateTime.Now.AddDays(7);
+
+            _userContext.Entry(user).State = EntityState.Modified;
+            await _userContext.SaveChangesAsync();  
         }
     }
 }
