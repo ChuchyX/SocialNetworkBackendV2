@@ -7,33 +7,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace SocialNetworkBackendV2.Application.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-
-        public UserService(IUserRepository userRepository)
+        private readonly IMapper _mapper;
+   
+        public UserService(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
+            _mapper = mapper;
         }
         public async Task<UserServiceResponse> RegisterUserAsync(UserRegisterDto userDto)
         {
-            var result = _userRepository.GetByEmail(userDto.Email);
+            var result = _userRepository.ExistsAny(userDto.Email);
             if(result.Result)
                 return new UserServiceResponse { Success = false, Message = "There is already a registered user with this email" };
 
-            Utilities.CreatePasswordHash(userDto.Password, out byte[] passwordHash, out byte[] passwordSalt);
-            User user = new User()
-            {
-                Email = userDto.Email,
-                Username = userDto.Username,
-                Edad = userDto.Edad,
-                Sexo = userDto.Sexo,
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt,
-            };
+            User user = _mapper.Map<User>(userDto);
             await _userRepository.Add(user);
 
             return new UserServiceResponse { Success = true, Message = "The user was successfully registered" };

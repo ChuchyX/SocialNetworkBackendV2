@@ -33,7 +33,7 @@ namespace SocialNetworkBackendV2.Infraestructure.Repositories
             return await _userContext.Users.ToListAsync();
         }
 
-        public async Task<bool> GetByEmail(string email)
+        public async Task<bool> ExistsAny(string email)
         {     
             return _userContext.Users.ToList().Any(x => x.Email == email); 
         }
