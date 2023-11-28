@@ -9,6 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace SocialNetworkBackendV2.Application.Services
 {
@@ -41,12 +44,36 @@ namespace SocialNetworkBackendV2.Application.Services
             var user = _userRepository.GetAll().Result.FirstOrDefault(u => u.Email == userLoginDto.Email && Utilities.VerifyPasswordHash(userLoginDto.Password, u.PasswordHash, u.PasswordSalt));
             if (user == null) return new UserServiceResponse { Success = false, Message = "User Not Found. Wrong Username or Password" };
 
-            _userRepository.AssignToken(user, Utilities.CreateToken(user, _configuration));
+            _userRepository.AssignToken(user, CreateToken(user));
 
             if (user.ProfilePicture != "")
                 user.ProfilePicture = Utilities.ImageToBase64(user.ProfilePicture);
 
             return new UserServiceResponse { Success = true, User = _mapper.Map<UserDto>(user) };
+        }
+        public string CreateToken(User user)
+        {
+            string role = "User";
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, role)
+            };
+
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
+                _configuration.GetSection("AppSettings:Token").Value));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: creds);
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
         }
     }
 }

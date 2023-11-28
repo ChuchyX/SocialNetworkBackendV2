@@ -23,9 +23,9 @@ namespace SocialNetworkBackendV2.API.Controllers
             var result = await _userService.RegisterUserAsync(user);
 
             if (!result.Success) 
-                return BadRequest(result.Message); 
+                return BadRequest(result); 
             
-            return Ok(result.Message);
+            return Ok(result);
         }
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(UserLoginDto userLoginDto)
@@ -37,5 +37,7 @@ namespace SocialNetworkBackendV2.API.Controllers
 
             return Ok(result.User);
         }
+
+        //Next: Upload PP
     }
 }
