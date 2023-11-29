@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetworkBackendV2.Application.DTOs_and_Response_Models;
 using SocialNetworkBackendV2.Application.Interfaces;
 using SocialNetworkBackendV2.Domain.Entities;
+using System.Security.Claims;
 
 namespace SocialNetworkBackendV2.API.Controllers
 {
@@ -34,6 +36,31 @@ namespace SocialNetworkBackendV2.API.Controllers
 
             if (!result.Success)
                 return BadRequest(result.Message);
+
+            return Ok(result);
+        }
+
+        [HttpGet("test")]
+        [Authorize]
+        public async Task<ActionResult> Test()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+
+            
+
+            var result = await _userService.Test(email);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            var authorizationHeader = HttpContext.Request.Headers["Authorization"].ToString();
+            string jwtToken = null;
+            if (authorizationHeader != null && authorizationHeader.StartsWith("Bearer"))
+            {
+                jwtToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+            }
+
+            result.Token = jwtToken;
 
             return Ok(result);
         }

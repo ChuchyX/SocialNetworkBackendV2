@@ -35,15 +35,20 @@ builder.Services.AddIdentity<User,IdentityRole>(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+var jwtSettings = builder.Configuration.GetSection("JWT");
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-                .GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.GetSection("Key").Value)),
             ValidateIssuer = false,
+            ValidIssuer = jwtSettings.GetSection("Issuer").Value,
             ValidateAudience = false
         };
     });

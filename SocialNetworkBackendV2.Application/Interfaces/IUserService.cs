@@ -11,5 +11,6 @@ namespace SocialNetworkBackendV2.Application.Interfaces
     {
         Task<UserServiceResponse> RegisterUserAsync(UserRegisterDto userDto);
         Task<UserServiceResponse> LoginUserAsync(UserLoginDto userLoginDto);
+        Task<UserServiceResponse> Test(string email);
     }
 }

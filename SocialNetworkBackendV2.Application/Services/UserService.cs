@@ -65,18 +65,25 @@ namespace SocialNetworkBackendV2.Application.Services
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
-                _configuration.GetSection("AppSettings:Token").Value));
-
+                _configuration.GetSection("JWT:Key").Value));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
             var token = new JwtSecurityToken(
+                issuer: _configuration.GetSection("JWT:Issuer").Value,
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddDays(double.Parse(_configuration.GetSection("JWT:Lifetime").Value)),
                 signingCredentials: creds);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
             return jwt;
+        }
+
+        public async Task<UserServiceResponse> Test(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            return new UserServiceResponse { Success = true, Message = "The user was successfully login", User = _mapper.Map<UserDto>(user) };
         }
     }
 }
