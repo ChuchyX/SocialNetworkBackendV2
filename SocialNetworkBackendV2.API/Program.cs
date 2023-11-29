@@ -10,6 +10,8 @@ using SocialNetworkBackendV2.Infraestructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using SocialNetworkBackendV2.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDomain();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddIdentity<User,IdentityRole>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequiredLength = 5;
+    options.Password.RequireDigit = true;
+})
+.AddEntityFrameworkStores<UserDbContext>()
+.AddDefaultTokenProviders();
 
 builder.Services.AddHttpContextAccessor();
 

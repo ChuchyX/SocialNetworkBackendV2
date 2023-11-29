@@ -9,9 +9,9 @@ namespace SocialNetworkBackendV2.Application.Interfaces
 {
     public interface IUserRepository
     {
-        Task Add(User user);
+        Task<bool> Add(User user, string password);
         Task<bool> ExistsEmail(string email);
         Task<IList<User>> GetAll();
-        void AssignToken(User user, string token);
+        //void AssignToken(User user, string token);
     }
 }

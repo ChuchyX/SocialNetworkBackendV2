@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace SocialNetworkBackendV2.Application.Services
 {
@@ -20,43 +21,45 @@ namespace SocialNetworkBackendV2.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly UserManager<User> _userManager;
 
-        public UserService(IUserRepository userRepository, IMapper mapper, IConfiguration configuration)
+        public UserService(IUserRepository userRepository, IMapper mapper, IConfiguration configuration, UserManager<User> userManager)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _configuration = configuration;
+            _userManager = userManager;
         }
 
         public async Task<UserServiceResponse> RegisterUserAsync(UserRegisterDto userDto)
         {
-            var result = _userRepository.ExistsEmail(userDto.Email).Result;
-            if(result)
+            var userExist = await _userManager.FindByEmailAsync(userDto.Email);
+            if (userExist != null) 
                 return new UserServiceResponse { Success = false, Message = "There is already a registered user with this email" };
 
-            User user = _mapper.Map<User>(userDto);
-            await _userRepository.Add(user);
+            var result = await _userManager.CreateAsync(_mapper.Map<User>(userDto), userDto.Password);
+            if(!result.Succeeded)
+                return new UserServiceResponse { Success = false, Message = "There was a problem trying to register the user. Please, try again" };
 
             return new UserServiceResponse { Success = true, Message = "The user was successfully registered" };
         }
         public async Task<UserServiceResponse> LoginUserAsync(UserLoginDto userLoginDto)
         {
-            var user = _userRepository.GetAll().Result.FirstOrDefault(u => u.Email == userLoginDto.Email && Utilities.VerifyPasswordHash(userLoginDto.Password, u.PasswordHash, u.PasswordSalt));
-            if (user == null) return new UserServiceResponse { Success = false, Message = "User Not Found. Wrong Username or Password" };
+            var user = await _userManager.FindByEmailAsync(userLoginDto.Email);
+            if (user != null && await _userManager.CheckPasswordAsync(user, userLoginDto.Password))
+            {
+                return new UserServiceResponse { Success = true, Message = "The user was successfully login", User = _mapper.Map<UserDto>(user), Token = CreateToken(user) };
+            }
 
-            _userRepository.AssignToken(user, CreateToken(user));
+            return new UserServiceResponse { Success = false, Message = "There was a problem trying to login the user. Wrong email or password" };
 
-            if (user.ProfilePicture != "")
-                user.ProfilePicture = Utilities.ImageToBase64(user.ProfilePicture);
-
-            return new UserServiceResponse { Success = true, User = _mapper.Map<UserDto>(user) };
         }
         public string CreateToken(User user)
         {
             string role = "User";
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, role)
             };

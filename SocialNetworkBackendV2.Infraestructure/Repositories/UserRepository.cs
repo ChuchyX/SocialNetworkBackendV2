@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SocialNetworkBackendV2.Application.Interfaces;
@@ -23,30 +24,19 @@ namespace SocialNetworkBackendV2.Infraestructure.Repositories
             _logger = logger;
         }
 
-        public async Task Add(User user)
+        public Task<bool> Add(User user, string password)
         {
-            await _userContext.Users.AddAsync(user);
-            await _userContext.SaveChangesAsync();
-        }   
-
-        public async Task<IList<User>> GetAll()
-        {
-            return await _userContext.Users.ToListAsync();
+            throw new NotImplementedException();
         }
 
-        public async Task<bool> ExistsEmail(string email)
-        {     
-            return _userContext.Users.ToList().Any(x => x.Email == email); 
+        public Task<bool> ExistsEmail(string email)
+        {
+            throw new NotImplementedException();
         }
 
-        public async void AssignToken(User user, string token)
+        public Task<IList<User>> GetAll()
         {
-            user.RefreshToken = token;
-            user.TokenCreated = DateTime.Now;
-            user.TokenExpires = DateTime.Now.AddDays(7);
-
-            _userContext.Entry(user).State = EntityState.Modified;
-            await _userContext.SaveChangesAsync();  
+            throw new NotImplementedException();
         }
     }
 }

@@ -14,14 +14,13 @@ namespace SocialNetworkBackendV2.Application.Mappings
     {
         public AutoMapperProfile() 
         {
-            CreateMap<UserRegisterDto, User>()
+            CreateMap<UserRegisterDto, User>();     
+            CreateMap<User, UserDto>()
                 .AfterMap((src, dest) =>
                 {
-                    Utilities.CreatePasswordHash(src.Password, out byte[] passwordHash, out byte[] passwordSalt);
-                    dest.PasswordHash = passwordHash;
-                    dest.PasswordSalt = passwordSalt;
+                    if (dest.ProfilePicture != "")
+                        dest.ProfilePicture = Utilities.ImageToBase64(dest.ProfilePicture);
                 });
-            CreateMap<User, UserDto>();
         }
     }
 }

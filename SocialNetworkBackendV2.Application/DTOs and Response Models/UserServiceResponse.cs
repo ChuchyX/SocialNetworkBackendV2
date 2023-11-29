@@ -12,5 +12,6 @@ namespace SocialNetworkBackendV2.Application.DTOs_and_Response_Models
         public string Message { get; set; }
 
         public UserDto User { get; set; }
+        public string Token { get; set; } = string.Empty;
     }
 }

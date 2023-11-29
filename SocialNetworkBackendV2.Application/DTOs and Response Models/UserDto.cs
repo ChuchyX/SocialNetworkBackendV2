@@ -12,9 +12,6 @@ namespace SocialNetworkBackendV2.Application.DTOs_and_Response_Models
         public string Email { get; set; }
         public int Edad { get; set; }
         public string Sexo { get; set; }
-        public string RefreshToken { get; set; }
-        public DateTime TokenCreated { get; set; }
-        public DateTime TokenExpires { get; set; }
         public string ProfilePicture { get; set; }
     }
 }

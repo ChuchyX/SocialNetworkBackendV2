@@ -18,7 +18,7 @@ namespace SocialNetworkBackendV2.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(UserRegisterDto user)
+        public async Task<ActionResult<UserServiceResponse>> Register(UserRegisterDto user)
         {    
             var result = await _userService.RegisterUserAsync(user);
 
@@ -28,14 +28,14 @@ namespace SocialNetworkBackendV2.API.Controllers
             return Ok(result);
         }
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login(UserLoginDto userLoginDto)
+        public async Task<ActionResult<UserServiceResponse>> Login(UserLoginDto userLoginDto)
         {
             var result = await _userService.LoginUserAsync(userLoginDto);
 
             if (!result.Success)
                 return BadRequest(result.Message);
 
-            return Ok(result.User);
+            return Ok(result);
         }
 
         //Next: Upload PP
